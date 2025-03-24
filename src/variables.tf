@@ -1,13 +1,31 @@
 variable "region" {
-  description = "The AWS region to deploy the infrastructure"
+  description = "The AWS region to deploy resources in"
   type        = string
-  default     = "us-east-1"
+}
+
+variable "bucket_name" {
+  description = "The name of the S3 bucket"
+  type        = string
+}
+
+variable "environment" {
+  description = "The environment (e.g., dev, prod)"
+  type        = string
+}
+
+variable "ami_id" {
+  description = "The AMI ID for the EC2 instance"
+  type        = string
 }
 
 variable "instance_type" {
-  description = "The type of EC2 instance to create"
+  description = "The instance type for the EC2 instance"
   type        = string
-  default     = "t2.micro"
+}
+
+variable "instance_name" {
+  description = "The name of the EC2 instance"
+  type        = string
 }
 
 variable "desired_capacity" {
