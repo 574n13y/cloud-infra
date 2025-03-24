@@ -1,6 +1,10 @@
 project_name = "cloud-infra-project"
 region = "us-west-2"
-instance_type = "t2.micro"
+bucket_name    = "my-example-bucket"
+environment    = "dev"
+ami_id         = "ami-0abcdef1234567890"
+instance_type  = "t2.micro"
+instance_name  = "example-instance"
 desired_capacity = 2
 max_size = 5
 min_size = 1
