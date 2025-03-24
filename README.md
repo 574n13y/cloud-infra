@@ -7,17 +7,24 @@ This project is designed to provision and manage cloud infrastructure using Terr
 ```
 cloud-infra-project
 ├── src
-│   ├── main.tf                # Main Terraform configuration file
-│   ├── variables.tf           # Input variables for Terraform configuration
-│   ├── outputs.tf             # Output values after infrastructure creation
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── providers.tf
+│   ├── backend.tf
 │   └── modules
-│       └── example-module
-│           ├── main.tf        # Module-specific Terraform configuration
-│           ├── variables.tf   # Input variables for the example module
-│           └── outputs.tf     # Output values for the example module
-├── .gitignore                 # Files and directories to ignore by Git
-├── README.md                  # Documentation for the project
-└── terraform.tfvars           # Values for input variables
+│       ├── networking
+│       ├── security
+│       ├── compute
+│       └── storage
+├── environments
+│   ├── dev
+│   ├── staging
+│   └── prod
+├── scripts
+├── .gitignore
+├── README.md
+└── terraform.tfvars
 ```
 
 ## Setup Instructions
@@ -54,6 +61,42 @@ cloud-infra-project
    ```
    terraform apply
    ```
+
+## Security Features
+- KMS encryption for S3 buckets
+- VPC with public and private subnets
+- Security groups with configurable rules
+- State file encryption
+- State locking with DynamoDB
+
+## Prerequisites
+- AWS CLI configured
+- Terraform >= 1.0.0
+- AWS account with appropriate permissions
+
+## Environment-specific Deployments
+```bash
+# For dev environment
+terraform workspace select dev
+terraform plan -var-file="environments/dev/terraform.tfvars"
+
+# For production
+terraform workspace select prod
+terraform plan -var-file="environments/prod/terraform.tfvars"
+```
+
+## Security Best Practices
+1. Use KMS encryption for sensitive data
+2. Implement least privilege access
+3. Enable versioning for S3 buckets
+4. Use private subnets for sensitive resources
+5. Implement proper tagging strategy
+
+## Monitoring and Maintenance
+- Regular security updates
+- Resource tagging for cost allocation
+- State file backups
+- Infrastructure documentation
 
 ## Usage Guidelines
 
