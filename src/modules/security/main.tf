@@ -20,10 +20,18 @@ resource "aws_security_group" "main" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(var.tags, {
+    Name = "${var.environment}-sg"
+  })
 }
 
 resource "aws_kms_key" "main" {
   description             = "KMS key for encryption"
   deletion_window_in_days = 7
   enable_key_rotation    = true
+
+  tags = merge(var.tags, {
+    Name = "${var.environment}-kms"
+  })
 }
