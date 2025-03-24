@@ -1,0 +1,9 @@
+environment     = "prod"
+region          = "us-west-2"
+vpc_cidr        = "10.2.0.0/16"
+instance_type   = "t2.large"
+desired_capacity = 3
+max_size        = 8
+min_size        = 2
+bucket_name     = "my-application-bucket"
+enable_versioning = true
