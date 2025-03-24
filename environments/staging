@@ -1,9 +1,0 @@
-environment     = "staging"
-region          = "us-west-2"
-vpc_cidr        = "10.1.0.0/16"
-instance_type   = "t2.medium"
-desired_capacity = 2
-max_size        = 6
-min_size        = 2
-bucket_name     = "my-application-bucket"
-enable_versioning = true
