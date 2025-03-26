@@ -51,3 +51,4 @@ jobs:
         terraform destroy \
           -var-file="environments/${{ github.event.inputs.environment }}/terraform.tfvars" \
           -auto-approve
+
