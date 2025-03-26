@@ -28,7 +28,7 @@ jobs:
           aws-region: us-east-1 # Change to your preferred region
 
       - name: Terraform Init
-        run: terraform init -backend-config="environments/${{ github.ref_name }}/backend.tfvars"
+        run: terraform init -backend-config="environments/dev/backend.tfvars"
         working-directory: src
 
       - name: Terraform Validate
@@ -36,10 +36,10 @@ jobs:
         working-directory: src
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environments/${{ github.ref_name }}/terraform.tfvars"
+        run: terraform plan -var-file="environments/dev/terraform.tfvars"
         working-directory: src
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var-file="environments/${{ github.ref_name }}/terraform.tfvars"
+        if: github.ref == 'refs/heads/features/fix-issues/workflow/secure' && github.event_name == 'push'
+        run: terraform apply -auto-approve -var-file="environments/dev/terraform.tfvars"
         working-directory: src

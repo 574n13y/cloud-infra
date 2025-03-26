@@ -19,11 +19,15 @@ cloud-infra-project
 │       └── storage           # S3 Buckets, Encryption
 ├── environments
 │   ├── dev
-│   │   └── terraform.tfvars
+│   │   ├──terraform.tfvars
+│   │   └──  backend.tfvars
 │   ├── staging
-│   │   └── terraform.tfvars
+│   │   ├──terraform.tfvars
+│   │   └──  backend.tfvars
 │   └── prod
-│       └── terraform.tfvars
+│       ├──terraform.tfvars
+│       └──  backend.tfvars
+├──  backend.tfvars
 ├── scripts
 │   ├── deploy.sh             # Deployment script
 │   └── cleanup.sh            # Resource cleanup script
