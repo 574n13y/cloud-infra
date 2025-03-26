@@ -1,21 +1,32 @@
+module "networking" {
+  source = "./modules/networking"
 
-
-resource "aws_s3_bucket" "example" {
-  bucket = var.bucket_name
-  acl    = "private"
-
-  tags = {
-    Name        = var.bucket_name
-    Environment = var.environment
-  }
+  vpc_cidr           = var.vpc_cidr
+  environment        = var.environment
+  availability_zones = var.availability_zones
+  private_subnets    = var.private_subnets
+  public_subnets     = var.public_subnets
 }
 
-resource "aws_ec2_instance" "example" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
+module "security" {
+  source = "./modules/security"
 
-  tags = {
-    Name        = var.instance_name
-    Environment = var.environment
-  }
+  vpc_id      = module.networking.vpc_id
+  environment = var.environment
+}
+
+module "compute" {
+  source = "./modules/compute"
+
+  environment        = var.environment
+  vpc_id            = module.networking.vpc_id
+  subnet_ids        = module.networking.private_subnet_ids
+  security_group_id = module.security.security_group_id
+}
+
+module "storage" {
+  source = "./modules/storage"
+
+  environment = var.environment
+  kms_key_id  = module.security.kms_key_id
 }
