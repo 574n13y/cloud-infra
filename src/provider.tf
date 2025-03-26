@@ -1,3 +1,15 @@
+provider "aws" {
+  region = var.aws_region
+  
+  default_tags {
+    tags = {
+      Environment = var.environment
+      Project     = var.project_name
+      ManagedBy   = "Terraform"
+    }
+  }
+}
+
 terraform {
   required_providers {
     aws = {
@@ -6,12 +18,4 @@ terraform {
     }
   }
   required_version = ">= 1.0.0"
-}
-
-provider "aws" {
-  region = var.region
-  
-  default_tags {
-    tags = var.default_tags
-  }
 }
