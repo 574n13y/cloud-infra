@@ -1,0 +1,136 @@
+name: 'Terraform CI/CD'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: 'us-west-2'
+
+jobs:
+  terraform-validate:
+    name: 'Terraform Validate'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: '1.6.0'
+
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check -recursive
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init -backend=false
+      
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color || (terraform validate -no-color && exit 1)
+
+  terraform-plan:
+    name: 'Terraform Plan'
+    needs: terraform-validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Debug AWS Credentials
+      run: aws sts get-caller-identity || exit 1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: '1.6.0'
+
+    - name: Verify Backend Config File
+      run: ls -lah environments/${{ matrix.environment }}/backend.tfvars
+
+    - name: Terraform Init
+      run: |
+        terraform init \
+          -backend-config="environments/${{ matrix.environment }}/backend.tfvars"
+
+    - name: Terraform Plan
+      id: plan
+      run: |
+        terraform plan \
+          -var-file="environments/${{ matrix.environment }}/terraform.tfvars" \
+          -out=tfplan-${{ matrix.environment }} || exit 1
+
+    - name: Debug Terraform Plan
+      run: cat tfplan-${{ matrix.environment }} || echo "No plan file generated!"
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: tfplan-${{ matrix.environment }}
+        path: tfplan-${{ matrix.environment }}
+        retention-days: 3
+
+  terraform-apply:
+    name: 'Terraform Apply'
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: '1.6.0'
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v4
+      with:
+        name: tfplan-${{ matrix.environment }}
+
+    - name: Terraform Init
+      run: |
+        terraform init \
+          -backend-config="environments/${{ matrix.environment }}/backend.tfvars"
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan-${{ matrix.environment }}
+
+# Note: Credentials are stored in GitHub Secrets
