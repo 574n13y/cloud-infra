@@ -17,10 +17,3 @@ resource "aws_subnet" "private" {
   availability_zone = "us-east-1b" #Change as needed.
 }
 
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
-
-output "public_subnet_ids" {
-  value = aws_subnet.public.*.id
-}
