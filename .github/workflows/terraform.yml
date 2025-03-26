@@ -3,7 +3,7 @@ name: Terraform
 on:
   push:
     branches:
-      - main
+      - features/fix-issues/workflow/secure
   pull_request:
 
 jobs:
@@ -27,19 +27,32 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1 # Change to your preferred region
 
+      - name: List files in environments/dev/
+        run: ls -l environments/dev/
+        working-directory: .
+
       - name: Terraform Init
         run: terraform init -backend-config="environments/dev/backend.tfvars"
-        working-directory: src
+        working-directory: .
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: src
+        working-directory: .
 
       - name: Terraform Plan
         run: terraform plan -var-file="environments/dev/terraform.tfvars"
-        working-directory: src
+        working-directory: .
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/features/fix-issues/workflow/secure' && github.event_name == 'push'
         run: terraform apply -auto-approve -var-file="environments/dev/terraform.tfvars"
-        working-directory: src
+        working-directory: .
+
+      - name: Post Configure AWS Credentials
+        run: echo "AWS credentials configured"
+
+      - name: Post Checkout code
+        run: echo "Code checked out"
+
+      - name: Complete job
+        run: echo "Terraform job complete"
