@@ -40,7 +40,7 @@ jobs:
       
     - name: Terraform Validate
       id: validate
-      run: terraform validate
+      run: terraform validate -no-color || (terraform validate -no-color && exit 1)
 
   terraform-plan:
     name: 'Terraform Plan'
@@ -61,10 +61,16 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: Debug AWS Credentials
+      run: aws sts get-caller-identity || exit 1
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: '1.6.0'
+
+    - name: Verify Backend Config File
+      run: ls -lah environments/${{ matrix.environment }}/backend.tfvars
 
     - name: Terraform Init
       run: |
@@ -77,7 +83,9 @@ jobs:
         terraform plan \
           -var-file="environments/${{ matrix.environment }}/terraform.tfvars" \
           -out=tfplan-${{ matrix.environment }} || exit 1
-      continue-on-error: true
+
+    - name: Debug Terraform Plan
+      run: cat tfplan-${{ matrix.environment }} || echo "No plan file generated!"
 
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v4
@@ -125,4 +133,4 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan-${{ matrix.environment }}
 
-# Note: Credentials are stored in GitHub Secrets
+
