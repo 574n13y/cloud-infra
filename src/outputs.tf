@@ -1,11 +1,19 @@
-output "instance_ip" {
-  value = aws_instance.example.public_ip
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = module.networking.vpc_id
 }
 
-output "instance_id" {
-  value = aws_instance.example.id
+output "private_subnet_ids" {
+  description = "IDs of private subnets"
+  value       = module.networking.private_subnet_ids
 }
 
-output "db_endpoint" {
-  value = aws_db_instance.example.endpoint
+output "public_subnet_ids" {
+  description = "IDs of public subnets"
+  value       = module.networking.public_subnet_ids
+}
+
+output "security_group_id" {
+  description = "ID of the main security group"
+  value       = module.security.security_group_id
 }
