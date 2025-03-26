@@ -30,40 +30,16 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend-config="environments/${{ github.ref_name }}/backend.tfvars"
         working-directory: src
-        env:
-          TF_VAR_vpc_cidr: ${{ vars.VPC_CIDR }}
-          TF_VAR_public_subnet_cidrs: ${{ vars.PUBLIC_SUBNET_CIDRS }}
-          TF_VAR_private_subnet_cidrs: ${{ vars.PRIVATE_SUBNET_CIDRS }}
-          TF_VAR_instance_type: ${{ vars.INSTANCE_TYPE }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
 
       - name: Terraform Validate
         run: terraform validate
         working-directory: src
-        env:
-          TF_VAR_vpc_cidr: ${{ vars.VPC_CIDR }}
-          TF_VAR_public_subnet_cidrs: ${{ vars.PUBLIC_SUBNET_CIDRS }}
-          TF_VAR_private_subnet_cidrs: ${{ vars.PRIVATE_SUBNET_CIDRS }}
-          TF_VAR_instance_type: ${{ vars.INSTANCE_TYPE }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
 
       - name: Terraform Plan
         run: terraform plan -var-file="environments/${{ github.ref_name }}/terraform.tfvars"
         working-directory: src
-        env:
-          TF_VAR_vpc_cidr: ${{ vars.VPC_CIDR }}
-          TF_VAR_public_subnet_cidrs: ${{ vars.PUBLIC_SUBNET_CIDRS }}
-          TF_VAR_private_subnet_cidrs: ${{ vars.PRIVATE_SUBNET_CIDRS }}
-          TF_VAR_instance_type: ${{ vars.INSTANCE_TYPE }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -var-file="environments/${{ github.ref_name }}/terraform.tfvars"
         working-directory: src
-        env:
-          TF_VAR_vpc_cidr: ${{ vars.VPC_CIDR }}
-          TF_VAR_public_subnet_cidrs: ${{ vars.PUBLIC_SUBNET_CIDRS }}
-          TF_VAR_private_subnet_cidrs: ${{ vars.PRIVATE_SUBNET_CIDRS }}
-          TF_VAR_instance_type: ${{ vars.INSTANCE_TYPE }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
