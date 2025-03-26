@@ -1,0 +1,53 @@
+name: 'Terraform Cleanup'
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to cleanup (dev/staging/prod)'
+        required: true
+        type: choice
+        options:
+        - dev
+        - staging
+        - prod
+
+permissions:
+  contents: read
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: 'us-west-2'
+
+jobs:
+  terraform-cleanup:
+    name: 'Terraform Cleanup'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: '1.5.0'
+
+    - name: Terraform Init
+      run: |
+        terraform init \
+          -backend-config="environments/${{ github.event.inputs.environment }}/backend.tfvars"
+
+    - name: Terraform Destroy
+      run: |
+        terraform destroy \
+          -var-file="environments/${{ github.event.inputs.environment }}/terraform.tfvars" \
+          -auto-approve
