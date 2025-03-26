@@ -20,6 +20,7 @@ jobs:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, staging, prod]
 
@@ -52,6 +53,7 @@ jobs:
           -out=tfplan-${{ matrix.environment }}
 
     - name: Store Terraform Plan
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: tfplan-${{ matrix.environment }}
