@@ -52,9 +52,12 @@ jobs:
           -var-file="environments/${{ matrix.environment }}/terraform.tfvars" \
           -out=tfplan-${{ matrix.environment }}
 
+    - name: Debug Terraform Plan
+      run: ls -lah tfplan-${{ matrix.environment }}
+
     - name: Store Terraform Plan
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tfplan-${{ matrix.environment }}
         path: tfplan-${{ matrix.environment }}
