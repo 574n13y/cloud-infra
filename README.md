@@ -139,8 +139,53 @@ module "security" {
 - State file backups
 - Infrastructure documentation
 
+...existing code...
 
+## CI/CD Pipeline
 
+### Workflows
+
+1. **Terraform CI/CD**
+   - Validates Terraform configurations
+   - Plans infrastructure changes
+   - Applies changes to environments
+   
+2. **Terraform Cleanup**
+   - Manual workflow for infrastructure cleanup
+   - Environment-specific destruction
+
+### Requirements
+
+- AWS credentials stored in GitHub Secrets
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+- Environment-specific approvals configured
+- Branch protection rules enabled
+
+### Pipeline Stages
+
+1. **Validate**
+   - Code formatting check
+   - Terraform validation
+   - Security scanning
+
+2. **Plan**
+   - Infrastructure planning
+   - Cost estimation
+   - Plan artifact creation
+
+3. **Apply**
+   - Environment-specific deployment
+   - Post-deployment verification
+   - Documentation updates
+
+## Security Considerations
+
+- All credentials stored in GitHub Secrets
+- Environment-specific approvals required
+- Branch protection rules enforced
+- Terraform state encrypted
+- Regular security scanning
 
 ## Usage Guidelines
 
