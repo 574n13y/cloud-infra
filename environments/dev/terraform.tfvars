@@ -1,9 +1,5 @@
 environment     = "dev"
-region          = "us-west-2"
+aws_region      = "us-west-2"
 vpc_cidr        = "10.0.0.0/16"
 instance_type   = "t2.micro"
-desired_capacity = 2
-max_size        = 4
-min_size        = 1
-bucket_name     = "my-application-bucket"
-enable_versioning = true
+bucket_name     = "my-dev-bucket"
