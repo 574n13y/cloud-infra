@@ -7,28 +7,16 @@ This project is designed to provision and manage cloud infrastructure using Terr
 ```
 cloud-infra-project
 ├── src
-│   ├── main.tf                # Main configuration file
+│   ├── main.tf                # Root configuration
 │   ├── variables.tf           # Root variables
 │   ├── outputs.tf             # Root outputs
 │   ├── providers.tf           # Provider configurations
-│   ├── backend.tf             # State backend configuration
+│   ├── backend.tf             # State management
 │   └── modules
-│       ├── networking
-│       │   ├── main.tf        # VPC, Subnets, NAT Gateway
-│       │   ├── variables.tf
-│       │   └── outputs.tf
-│       ├── security
-│       │   ├── main.tf        # Security Groups, KMS Keys
-│       │   ├── variables.tf
-│       │   └── outputs.tf
-│       ├── compute
-│       │   ├── main.tf        # EC2, Auto Scaling Groups
-│       │   ├── variables.tf
-│       │   └── outputs.tf
-│       └── storage
-│           ├── main.tf        # S3 Buckets, Encryption
-│           ├── variables.tf
-│           └── outputs.tf
+│       ├── networking         # VPC, Subnets, NAT Gateway
+│       ├── security          # Security Groups, KMS Keys
+│       ├── compute           # EC2, Auto Scaling Groups
+│       └── storage           # S3 Buckets, Encryption
 ├── environments
 │   ├── dev
 │   │   └── terraform.tfvars
@@ -36,65 +24,62 @@ cloud-infra-project
 │   │   └── terraform.tfvars
 │   └── prod
 │       └── terraform.tfvars
-├── scripts                    # Utility scripts
+├── scripts
+│   ├── deploy.sh             # Deployment script
+│   └── cleanup.sh            # Resource cleanup script
+├── .github
+│   ├── workflows
+│   │   ├── terraform.yml     # Main CI/CD workflow
+│   │   └── cleanup.yml       # Cleanup workflow
+│   ├── CODEOWNERS            # Code review assignments
+│   └── pull_request_template.md
 ├── .gitignore
 └── README.md
 ```
 
-## Features
+## Prerequisites
 
-- **Networking Module**: VPC with public/private subnets, NAT Gateways
-- **Security Module**: Preconfigured security groups, KMS encryption
-- **Compute Module**: Auto Scaling Groups, Launch Templates
-- **Storage Module**: S3 buckets with versioning and encryption
+- AWS CLI configured with appropriate credentials
+- Terraform >= 1.0.0
+- Git
+- Bash shell (Git Bash for Windows)
 
 
 ## Setup Instructions
 
 1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
-   cd cloud-infra-project
+   ```powershell
+   git clone https://github.com/574n13y/cloud-infra.git
+   cd cloud-infra
    ```
 
-2. **Select Environment**
-   ```bash
-   terraform workspace new dev    # or staging/prod
+2. **Configure AWS Credentials**
+   ```powershell
+   aws configure
    ```
 
-3. **Initialize Terraform**
-   ```bash
-   terraform init
+3. **Select Environment**
+   ```powershell
+   terraform workspace new dev  # or staging/prod
    ```
 
-4. **Configure Environment Variables**
-   ```bash
-   cp environments/dev/terraform.tfvars.example environments/dev/terraform.tfvars
-   # Edit terraform.tfvars with your values
+4. **Initialize Infrastructure**
+   ```powershell
+   terraform init -backend-config="environments/dev/backend.tfvars"
    ```
 
-5. **Plan the Infrastructure**
-   ```bash
+5. **Validate Configuration**
+   ```powershell
+   terraform validate
+   terraform fmt -recursive
    terraform plan -var-file="environments/dev/terraform.tfvars"
    ```
 
-6. **Apply the Configuration**
-   ```bash
+6. **Deploy Infrastructure**
+   ```powershell
    terraform apply -var-file="environments/dev/terraform.tfvars"
    ```
-
-## Security Features
-- VPC with private/public subnet separation
-- Security groups with least privilege access
-- KMS encryption for sensitive data
-- S3 bucket versioning and encryption
-- State file encryption and locking
-
-## Prerequisites
-- AWS CLI configured
-- Terraform >= 1.0.0
-- AWS account with appropriate permissions
-
+   
 ## Environment-specific Deployments
 ```bash
 # For dev environment
@@ -105,6 +90,22 @@ terraform plan -var-file="environments/dev/terraform.tfvars"
 terraform workspace select prod
 terraform plan -var-file="environments/prod/terraform.tfvars"
 ```
+
+## Features
+
+- **Networking Module**: VPC with public/private subnets, NAT Gateways
+- **Security Module**: Preconfigured security groups, KMS encryption
+- **Compute Module**: Auto Scaling Groups, Launch Templates
+- **Storage Module**: S3 buckets with versioning and encryption
+
+
+## Security Features
+- VPC with private/public subnet separation
+- Security groups with least privilege access
+- KMS encryption for sensitive data
+- S3 bucket versioning and encryption
+- State file encryption and locking
+
 
 ## Security Best Practices
 1. Use KMS encryption for sensitive data
@@ -140,7 +141,6 @@ module "security" {
 - Infrastructure documentation
 
 ...existing code...
-
 ## CI/CD Pipeline
 
 ### Workflows
@@ -153,14 +153,6 @@ module "security" {
 2. **Terraform Cleanup**
    - Manual workflow for infrastructure cleanup
    - Environment-specific destruction
-
-### Requirements
-
-- AWS credentials stored in GitHub Secrets
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-- Environment-specific approvals configured
-- Branch protection rules enabled
 
 ### Pipeline Stages
 
@@ -179,13 +171,81 @@ module "security" {
    - Post-deployment verification
    - Documentation updates
 
-## Security Considerations
+## Security Best Practices
 
-- All credentials stored in GitHub Secrets
-- Environment-specific approvals required
-- Branch protection rules enforced
-- Terraform state encrypted
-- Regular security scanning
+1. **Infrastructure Security**
+   - VPC with private/public subnet isolation
+   - Security groups with least privilege access
+   - KMS encryption for sensitive data
+   - State file encryption and locking
+     
+2. **CI/CD Security**
+   - Credentials stored in GitHub Secrets
+   - Environment-specific approvals
+   - Branch protection rules
+   - Regular security scanning
+
+3. **Monitoring**
+   - CloudWatch monitoring enabled
+   - AWS Config rules
+   - Resource tagging for tracking
+
+## Troubleshooting
+
+1. **State Lock Issues**
+   ```powershell
+   terraform force-unlock <LOCK_ID>
+   ```
+
+2. **Plan Verification**
+   ```powershell
+   terraform show
+   terraform plan -out=tfplan
+   ```
+3. **Common Issues**
+   - Backend configuration errors
+   - AWS credential issues
+   - Resource conflicts
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+   ```powershell
+   git checkout -b feature/your-feature
+   ```
+3. Make changes and test
+4. Submit PR with detailed description
+
+## Scripts
+
+### Deploy Script
+```powershell
+./scripts/deploy.sh -e dev            # Deploy to dev
+./scripts/deploy.sh -e dev -p         # Plan only
+./scripts/deploy.sh -e prod -f        # Force deploy
+```
+
+### Cleanup Script
+```powershell
+./scripts/cleanup.sh -e dev           # Cleanup dev
+./scripts/cleanup.sh -e prod -f       # Force cleanup
+```
+
+## License
+
+MIT License - See LICENSE file
+
+## Support
+
+- Open an issue for bugs
+- Submit PR for improvements
+- Contact maintainers for critical issues
+
+## Authors
+```
+- Stanley - [@574n13y](https://github.com/574n13y)
+```
 
 ## Usage Guidelines
 
@@ -193,12 +253,3 @@ module "security" {
 - Customize the input variables in `variables.tf` and `terraform.tfvars` as needed for your environment.
 - Review the output values defined in `outputs.tf` to understand the resources created after applying the configuration.
 
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
-1. Create a new branch
-2. Make your changes
-3. Submit a pull request
-
-## License
-MIT License
