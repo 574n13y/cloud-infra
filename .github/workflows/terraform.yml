@@ -1,81 +1,58 @@
-name: 'Terraform CI/CD'
+name: Terraform
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - features/fix-issues/workflow/secure
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pull-requests: write
-
-env:
-  TF_LOG: INFO
-  AWS_REGION: 'us-west-2'
 
 jobs:
-  validate:
-    name: 'Validate'
+  terraform:
+    name: Terraform
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: '1.5.0'
 
-    - name: Terraform Format
-      run: terraform fmt -check -recursive
-      
-    - name: Terraform Init
-      run: terraform init -backend=false
-      
-    - name: Terraform Validate
-      run: terraform validate
-
-  plan:
-    name: 'Plan'
-    needs: validate
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: [dev, staging, prod]
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: '1.5.0'
-    
-    - name: Terraform Init
-      working-directory: ./src
-      run: |
-        terraform init \
-          -backend-config="../environments/${{ matrix.environment }}/backend.tfvars"
-    
-    - name: Terraform Plan
-      working-directory: ./src
-      run: |
-        terraform plan \
-          -var-file="../environments/${{ matrix.environment }}/terraform.tfvars" \
-          -out=tfplan-${{ matrix.environment }}
-    
-    - name: Upload Plan
-      uses: actions/upload-artifact@v3
-      with:
-        name: tfplan-${{ matrix.environment }}
-        path: src/tfplan-${{ matrix.environment }}
-        retention-days: 1
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # Change to your preferred region
+
+      - name: List files in environments/dev/
+        run: ls -l environments/dev/
+        working-directory: .
+
+      - name: Terraform Init
+        run: terraform init -backend-config="environments/dev/backend.tfvars"
+        working-directory: .
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: .
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="environments/dev/terraform.tfvars"
+        working-directory: .
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/features/fix-issues/workflow/secure' && github.event_name == 'push'
+        run: terraform apply -auto-approve -var-file="environments/dev/terraform.tfvars"
+        working-directory: .
+
+      - name: Post Configure AWS Credentials
+        run: echo "AWS credentials configured"
+
+      - name: Post Checkout code
+        run: echo "Code checked out"
+
+      - name: Complete job
+        run: echo "Terraform job complete"

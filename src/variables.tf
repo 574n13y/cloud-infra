@@ -1,36 +1,24 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-west-2"
-}
-
-variable "environment" {
-  description = "Environment name (dev, staging, prod)"
-  type        = string
-}
-
-variable "project_name" {
-  description = "Name of the project"
-  type        = string
-  default     = "cloud-infra"
-}
-
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "CIDR block for the VPC"
   type        = string
 }
 
-variable "availability_zones" {
-  description = "List of availability zones"
+variable "public_subnet_cidrs" {
+  description = "List of CIDR blocks for public subnets"
   type        = list(string)
 }
 
-variable "private_subnets" {
-  description = "List of private subnet CIDR blocks"
+variable "private_subnet_cidrs" {
+  description = "List of CIDR blocks for private subnets"
   type        = list(string)
 }
 
-variable "public_subnets" {
-  description = "List of public subnet CIDR blocks"
-  type        = list(string)
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+}
+
+variable "bucket_name" {
+  description = "S3 bucket name"
+  type        = string
 }
