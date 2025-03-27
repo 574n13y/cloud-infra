@@ -32,7 +32,7 @@ jobs:
         working-directory: .
 
       - name: Terraform Init
-        run: terraform init -backend-config="environments/dev/backend.tfvars"
+        run: terraform init -backend-config="src/backend.tf"
         working-directory: .
 
       - name: Terraform Validate
@@ -40,12 +40,12 @@ jobs:
         working-directory: .
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environments/dev/terraform.tfvars"
+        run: terraform plan -var-file="src/backend.tf"
         working-directory: .
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/features/fix-issues/workflow/secure' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var-file="environments/dev/terraform.tfvars"
+        run: terraform apply -auto-approve -var-file="src/backend.tf"
         working-directory: .
 
       - name: Post Configure AWS Credentials
